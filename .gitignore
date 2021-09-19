@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# numpy and pickle files
+*.npy
+*.pkl

@@ -12,9 +12,11 @@ def convert(input_path, output_path):
     input_dataset = np.load(input_path, allow_pickle='TRUE').item()
     N_events = len(input_dataset[0].keys())
     N_samples = len(input_dataset)
-    train_ratio = 0.8
+    train_ratio = 0.6
+    dev_ratio = 0.2
     output_train = {'test1': [], 'args': None, 'dim_process': N_events, "train":[]}
     output_test = {'test1': [], 'args': None, 'dim_process': N_events, "test":[]}
+    output_dev = {'test1': [], 'args': None, 'dim_process': N_events, "dev":[]}
     
     
     for ID, sample in input_dataset.items():
@@ -31,6 +33,8 @@ def convert(input_path, output_path):
         
         if ID <= train_ratio * N_samples:
             output_train["train"].append(new_sample)
+        elif ID <= (train_ratio + dev_ratio) * N_samples:
+            output_dev["dev"].append(new_sample)
         else:
             output_test["test"].append(new_sample)
         
@@ -38,12 +42,23 @@ def convert(input_path, output_path):
         pickle.dump(output_train, f, protocol=2) #convert to python2 pickle
     with open(output_path+"test.pkl", "wb") as f:
         pickle.dump(output_test, f, protocol=2) #convert to python2 pickle
+    with open(output_path+"dev.pkl", "wb") as f:
+        pickle.dump(output_dev, f, protocol=2) #convert to python2 pickle
 
         
                 
 
 if __name__ == "__main__":
-    input_crime = "../data/crime_all_day_scaled.npy"
-    output_crime = "./data/crime/"
-    convert(input_crime, output_crime)
+    #input_crime = "../data/crime_all_day_scaled.npy"
+    #output_crime = "./data/crime/"
+    #convert(input_crime, output_crime)
+
+    input_mimic = "../data/mimic_3_clip_scaled.npy"
+    output_mimic = "./data/mimic_clip/"
+    convert(input_mimic, output_mimic)
+    
+    #input_mimic = "../data/mimic_3_scaled.npy"
+    #output_mimic = "./data/mimic/"
+    #convert(input_mimic, output_mimic)
+
     

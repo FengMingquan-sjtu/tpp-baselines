@@ -1,0 +1,36 @@
+crime (LSTM dim=64)
+target, mae
+10, 1.180
+
+(LSTM dim=16)
+target, mae
+10, 0.5420738116021586
+11, 1.711543154167409
+12, 17.210620837783274
+13, 4.320311013591351
+
+(LSTM, dim=8)
+target,mae
+10, 0.6130930754413197
+11, 1.300145581724965
+12, 8.877137358215085
+13, 1.2692902573272202 
+
+(LSTM, dim=4)
+10, 0.5608669994184409
+11, 1.054851117294317
+12, 11.917053394515557
+13, 2.6780931406866486
+
+
+mimic 
+target 51 (mimic_3_scaled, wrong dataset!)
+(LSTM dim = 8) 50+
+(LSTM dim = 16) 141.19666241018086
+
+target 51(mimic_3_clip_scaled)
+(LSTM dim = 4) mae=12.
+(LSTM dim=8) mae== 1.6848595956819155, (error larger than 4 is discarded)
+
+target 51(mimic_3_clip_scaled)
+(LSTM dim=8), acc = 0.802409638554 (error larger than 4 is discarded, error less than 3 is defiend to be "accurate".)

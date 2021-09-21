@@ -292,6 +292,11 @@ def main():
         tag_data = 'meme'
     if 'data_mimic' in input_test['path_rawdata']:
         tag_data = 'mimic'
+    # our iclr22 data.
+    if 'crime' in input_test['path_rawdata']:
+        tag_data = 'crime'
+    if 'mimic' in input_test['path_rawdata']:
+        tag_data = 'mimic'
     #
     if 'data_so' in input_test['path_rawdata']:
         tag_data = 'so'

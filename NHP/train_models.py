@@ -65,7 +65,7 @@ def main():
     #
     parser.add_argument(
         '-d', '--DimLSTM', #required=False,
-        default = 64, type = int,
+        default = 4, type = int,
         help='Dimension of LSTM model '
     )
     parser.add_argument(

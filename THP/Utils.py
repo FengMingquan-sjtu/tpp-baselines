@@ -113,6 +113,61 @@ def time_loss(prediction, event_time):
     se = torch.sum(diff * diff)
     return se
 
+def MAE_event(prediction, event_time, event_type, target_type):
+    
+    # convert [1,2,3] based types to [0,1,2]; also convert padding events to -1
+    
+    pred_type = prediction[0]
+
+    pred_type = torch.max(pred_type, dim=-1)[1]
+    pred_type_mask = pred_type == target_type+1
+
+    """ Time prediction loss. """
+    #print(event_type)
+    pred_time = prediction[1]
+    pred_time.squeeze_(-1)
+
+    #print(event_time)
+    true_type_mask = event_type == int(target_type)+1
+    
+    
+    
+
+    
+    #print(true)
+    #mask *= true > 1e-01
+    pred_time = torch.cumsum(pred_time, dim=1)
+    
+
+    
+    # event time gap prediction
+    ae = 0
+    ac = 0
+    cnt = 0
+    
+    for i in range(event_time.shape[0]):
+        gt =  event_time[i][true_type_mask[i]]
+        pred = pred_time[i][pred_type_mask[i]]
+        
+        for j in range(len(gt)):
+            true_t = gt[j]
+            if len(pred)>= j or len(pred)==0:
+                pred_t = 5
+            else:
+                pred_t = pred[j]
+            
+            
+            e =  abs(pred_t - true_t)
+            if e < 2:
+                ae += e
+                cnt += 1
+                if e < 1.3:
+                    ac +=1
+    
+    
+    
+    return ae, ac, cnt
+
 
 class LabelSmoothingLoss(nn.Module):
     """

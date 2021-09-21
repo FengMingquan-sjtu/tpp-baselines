@@ -700,7 +700,15 @@ class NeuralHawkesCTLSTM(object):
             self.W_recur, self.b_recur
             #self.h_0, self.c_0
         ]
+        #N_param = 0
+        #for p in self.params:
+        #    N_param += p.get_value().size
+            
+        #print "N_param"
+        #print N_param
+        #raise ValueError
         #
+
         self.grad_params = None
         self.cost_to_optimize = None
         #
@@ -4351,6 +4359,7 @@ class GeneralizedNeuralHawkesCTSM_time(object):
             self.W_recur, self.b_recur
             #self.h_0, self.c_0
         ]
+        
         self.grad_params = None
         self.cost_to_optimize = None
         #

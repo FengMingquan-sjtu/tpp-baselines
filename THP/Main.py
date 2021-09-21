@@ -32,8 +32,9 @@ def prepare_dataloader(opt):
     test_data, _ = load_data(opt.data + 'test.pkl', 'test')
 
     trainloader = get_dataloader(train_data, opt.batch_size, shuffle=True)
+    devloader = get_dataloader(dev_data, opt.batch_size, shuffle=False)
     testloader = get_dataloader(test_data, opt.batch_size, shuffle=False)
-    return trainloader, testloader, num_types
+    return trainloader, devloader, testloader, num_types
 
 
 def train_epoch(model, training_data, optimizer, pred_loss_func, opt):
@@ -123,6 +124,45 @@ def eval_epoch(model, validation_data, pred_loss_func, opt):
     return total_event_ll / total_num_event, total_event_rate / total_num_pred, rmse
 
 
+def test_epoch(model, test_data, opt):
+    """ Epoch operation in evaluation phase. """
+
+    model.eval()
+
+
+    total_time_mae = 0  # cumulative time prediction abs error
+    total_acc = 0
+    count = 0
+
+    with torch.no_grad():
+        for batch in tqdm(test_data, mininterval=2,
+                          desc='  - (Test) ', leave=False):
+            """ prepare data """
+            event_time, time_gap, event_type = map(lambda x: x.to(opt.device), batch)
+
+            """ forward """
+            enc_out, prediction = model(event_type, event_time)
+
+            """ compute loss """
+            
+            ae, ac, cnt = Utils.MAE_event(prediction, event_time, event_type, opt.target)
+
+            """ note keeping """
+            
+            total_time_mae += ae
+            total_acc += ac
+            count += cnt
+            
+            #print(total_time_ae, total_num_pred)
+    print("target=", opt.target)
+
+    mae = total_time_mae / count
+    print("mae=", mae)
+
+    acc = float(total_acc) / count
+    print("acc=", acc)
+    return 
+
 def train(model, training_data, validation_data, optimizer, scheduler, pred_loss_func, opt):
     """ Start training. """
 
@@ -160,6 +200,8 @@ def train(model, training_data, validation_data, optimizer, scheduler, pred_loss
                     .format(epoch=epoch, ll=valid_event, acc=valid_type, rmse=valid_time))
 
         scheduler.step()
+    with open("model-53000.pkl","wb") as f:
+        pickle.dump(model,f)
 
 
 def main():
@@ -187,6 +229,9 @@ def main():
 
     parser.add_argument('-log', type=str, default='log.txt')
 
+    parser.add_argument('-is_test', type=int, default=0)
+    parser.add_argument('-target', type=int, default=0)
+
     opt = parser.parse_args()
 
     # default device is CUDA
@@ -199,7 +244,7 @@ def main():
     print('[Info] parameters: {}'.format(opt))
 
     """ prepare dataloader """
-    trainloader, testloader, num_types = prepare_dataloader(opt)
+    trainloader, devloader, testloader, num_types = prepare_dataloader(opt)
 
     """ prepare model """
     model = Transformer(
@@ -231,7 +276,13 @@ def main():
     print('[Info] Number of parameters: {}'.format(num_params))
 
     """ train the model """
-    train(model, trainloader, testloader, optimizer, scheduler, pred_loss_func, opt)
+    if opt.is_test:
+        with open("model-0.pkl", "rb") as f:
+            model = pickle.load(f)
+        test_epoch(model, devloader, opt)
+    else:
+        train(model, trainloader, testloader, optimizer, scheduler, pred_loss_func, opt)
+
 
 
 if __name__ == '__main__':
